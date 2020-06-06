@@ -1,8 +1,34 @@
 # download data
 if(!file.exists("./data")) dir.create("./data")
-#fileUrl <- "https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2Fss06hid.csv"
-#download.file(fileUrl, destfile = "./data/ACS.csv")
+fileUrl <- "https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip"
+#download.file(fileUrl, destfile = "./data/Dataset.zip")
+unzip(zipfile = "./data/Dataset.zip", exdir = './data/')
+
+# 1. Merge the training and the test sets to create one data set.
+
 # load data into R
-acs <- read.csv("./data/ACS.csv")
-agricultureLogical <- (acs$ACR==3 & acs$AGS == 6)
-which(agricultureLogical)[1:3]
+x_train <- read.table("./data/UCI HAR Dataset/train/X_train.txt")
+y_train <- read.table("./data/UCI HAR Dataset/train/Y_train.txt")
+subject_train <- read.table("./data/UCI HAR Dataset/train/subject_train.txt")
+x_test <- read.table("./data/UCI HAR Dataset/test/X_test.txt")
+y_test <- read.table("./data/UCI HAR Dataset/test/Y_test.txt")
+subject_test <- read.table("./data/UCI HAR Dataset/test/subject_test.txt")
+
+train_set <- cbind(subject_train,y_train,x_train)
+test_set <- cbind(subject_test,y_test,x_test)
+data_set <- rbind(train_set,test_set)
+
+#-------------------------------------------------------------------------------
+# 2. Extract only the measurements on the mean and standard deviation for each measurement. 
+
+## step 1: load feature name into R
+featureName <- read.table("./data/UCI HAR Dataset/features.txt", stringsAsFactors = FALSE)[,2]
+
+## step 2:  extract mean and standard deviation of each measurements
+featureIndex <- grep(("mean\\(\\)|std\\(\\)"), featureName)
+finalData <- data_set[, c(1, 2, featureIndex+2)]
+colnames(finalData) <- c("subject", "activity", featureName[featureIndex])
+
+
+
+
